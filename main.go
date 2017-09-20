@@ -22,13 +22,13 @@ var (
 )
 
 var (
-	version       = flag.Bool("version", false, "Version of Docker Volume GlusterFS")
-	serversList   = os.Getenv("servers")
-	mountPath     = filepath.Join(volume.DefaultDockerRootDirectory, glusterfsID)
-	login         = os.Getenv("login")
-	password      = os.Getenv("password")
-	port, portErr = strconv.Atoi(os.Getenv("port"))
-	base          = os.Getenv("base")
+	version       = *flag.Bool("version", false, "Version of docker-volume-glusterfs")
+	root     = filepath.Join(volume.DefaultDockerRootDirectory, glusterfsID)
+	login         = *flag.String("login","docker","login")
+	password      = *flag.String("password","docker","pwd")
+	port, portErr = strconv.Atoi(*flag.String("port", "9000", "port"))
+	base          = *flag.String("base", "/var/lib/glusterd/vols", "GlusterFS volumes root directory")
+	serversList   = *flag.String("servers", "", "List of glusterfs servers")
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 
 	flag.Parse()
 
-	if *version {
+	if version {
 		os.Exit(0)
 	}
 
@@ -45,24 +45,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if login == "" {
-		login = "docker"
-	}
-
-	if password == "" {
-		password = "docker"
-	}
-
 	if portErr != nil {
 		port = 9000
 	}
 
-	if base == "" {
-		base = "/var/lib/gluster/bricks"
-	}
-
 	servers := strings.Split(serversList, ":")
-	d := newGlusterfsDriver(mountPath, servers, login, password, port, base)
+	//d := newGlusterfsDriver(*root, *restAddress, *gfsBase, servers)
+	d := newGlusterfsDriver(root, servers, login, password, port, base)
 
 	h := volume.NewHandler(d)
 	fmt.Println(h.ServeUnix("glusterfs", 0))

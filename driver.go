@@ -75,9 +75,9 @@ func (g GlusterRestClient) createVolume(name string) error {
 	return nil
 }
 
-func newGlusterfsDriver(mountPath string, servers []string, login string, password string, port int, base string) glusterfsDriver {
+func newGlusterfsDriver(root string, servers []string, login string, password string, port int, base string) glusterfsDriver {
 	d := glusterfsDriver{
-		root:    mountPath,
+		root:    root,
 		servers: servers,
 		volumes: map[string]*volumeName{},
 		m:       &sync.Mutex{},

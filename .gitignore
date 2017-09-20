@@ -4,3 +4,4 @@ dist
 docker-volume-glusterfs
 content
 plugin
+/.idea/*
