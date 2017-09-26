@@ -6,29 +6,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"strconv"
-
 	"github.com/docker/go-plugins-helpers/volume"
 )
 
 const glusterfsID = "_glusterfs"
 
 var (
-	//Version comes from Makefile
-	Version string
-	//Build comes from Makefile
-	Build string
-)
-
-var (
-	version       = *flag.Bool("version", false, "Version of docker-volume-glusterfs")
-	root     = filepath.Join(volume.DefaultDockerRootDirectory, glusterfsID)
-	login         = *flag.String("login","docker","login")
-	password      = *flag.String("password","docker","pwd")
-	port, portErr = strconv.Atoi(*flag.String("port", "9000", "port"))
-	base          = *flag.String("base", "/var/lib/glusterd/vols", "GlusterFS volumes root directory")
-	serversList   = *flag.String("servers", "", "List of glusterfs servers")
+	root        = filepath.Join(volume.DefaultDockerRootDirectory, glusterfsID)
+	login       = flag.String("login", "docker", "login")
+	password    = flag.String("password", "docker", "pwd")
+	port        = flag.Int("port", 9000, "port")
+	base        = flag.String("base", "/var/lib/glusterd/vols", "GlusterFS volumes root directory")
+	serversList = flag.String("servers", "", "List of glusterfs servers")
 )
 
 func main() {
@@ -36,22 +25,14 @@ func main() {
 
 	flag.Parse()
 
-	if version {
-		os.Exit(0)
-	}
-
-	if serversList == "" {
-		fmt.Println("ERROR : you must set servers env variable, delimited by ':'")
+	if *serversList == "" {
+		fmt.Println("ERROR : you must set servers variable, delimited by ':'")
 		os.Exit(1)
 	}
 
-	if portErr != nil {
-		port = 9000
-	}
-
-	servers := strings.Split(serversList, ":")
+	servers := strings.Split(*serversList, ":")
 	//d := newGlusterfsDriver(*root, *restAddress, *gfsBase, servers)
-	d := newGlusterfsDriver(root, servers, login, password, port, base)
+	d := newGlusterfsDriver(root, servers, *login, *password, *port, *base)
 
 	h := volume.NewHandler(d)
 	fmt.Println(h.ServeUnix("glusterfs", 0))
@@ -69,8 +50,4 @@ func banner() {
 	fmt.Println("              / /_/ / / /_/ (__  ) /_/  __/ /  / __(__  )              ")
 	fmt.Println("              \\__, /_/\\__,_/____/\\__/\\___/_/  /_/ /____/               ")
 	fmt.Println("             /____/                                                    ")
-	fmt.Println()
-	fmt.Println("Version : ", Version)
-	fmt.Println("Build   : ", Build)
-	fmt.Println()
 }
